@@ -3,9 +3,12 @@ let books = require("./booksdb.js");
 let isValid = require("./auth_users.js").isValid;
 let users = require("./auth_users.js").users;
 const axios = require('axios');
+
 const public_users = express.Router();
 
-
+/* ---------------------------------------------------
+   REGISTER USER
+--------------------------------------------------- */
 public_users.post("/register", (req, res) => {
 
   const username = req.body.username;
@@ -13,8 +16,10 @@ public_users.post("/register", (req, res) => {
 
   if (username && password) {
 
+    // check if user already exists
     if (!isValid(username)) {
 
+      // add new user
       users.push({
         username: username,
         password: password
@@ -35,10 +40,12 @@ public_users.post("/register", (req, res) => {
   return res.status(404).json({
     message: "Unable to register user."
   });
-
 });
 
-// Get the book list available in the shop
+
+/* ---------------------------------------------------
+   TASK 10: GET ALL BOOKS (ASYNC/AWAIT + PROMISE)
+--------------------------------------------------- */
 public_users.get('/', async function (req, res) {
 
   const getBooks = () => {
@@ -56,7 +63,10 @@ public_users.get('/', async function (req, res) {
 
 });
 
-// Get book details based on ISBN
+
+/* ---------------------------------------------------
+   TASK 11: GET BOOK BY ISBN
+--------------------------------------------------- */
 public_users.get('/isbn/:isbn', async function (req, res) {
 
   const isbn = req.params.isbn;
@@ -81,8 +91,11 @@ public_users.get('/isbn/:isbn', async function (req, res) {
   }
 
 });
-  
-// Get book details based on author
+
+
+/* ---------------------------------------------------
+   TASK 12: GET BOOKS BY AUTHOR
+--------------------------------------------------- */
 public_users.get('/author/:author', async function (req, res) {
 
   const author = req.params.author;
@@ -117,7 +130,10 @@ public_users.get('/author/:author', async function (req, res) {
 
 });
 
-// Get all books based on title
+
+/* ---------------------------------------------------
+   TASK 13: GET BOOKS BY TITLE
+--------------------------------------------------- */
 public_users.get('/title/:title', async function (req, res) {
 
   const title = req.params.title;
@@ -152,16 +168,21 @@ public_users.get('/title/:title', async function (req, res) {
 
 });
 
-//  Get book review
+
+/* ---------------------------------------------------
+   GET REVIEWS BY ISBN
+--------------------------------------------------- */
 public_users.get('/review/:isbn', function (req, res) {
 
   const isbn = req.params.isbn;
 
-  const book = books[isbn];
+  if (books[isbn]) {
+    return res.status(200).json(books[isbn].reviews);
+  }
 
-  // Return only the reviews of the book
-  res.status(200).json(book.reviews);
+  return res.status(404).json({ message: "Book not found" });
 
 });
+
 
 module.exports.general = public_users;
